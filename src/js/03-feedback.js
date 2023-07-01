@@ -12,10 +12,6 @@ function onInputChangeValue(e) {
   if (e.target === e.currentTarget) {
     return;
   }
-  const { name, value } = e.target;
-
-  console.log('name', formDate[name]);
-  console.log('value', value);
 
   formDate[e.target.name] = e.target.value;
   localStorage.setItem('feedback-form-state', JSON.stringify(formDate));
