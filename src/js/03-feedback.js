@@ -1,43 +1,38 @@
 import throttle from 'lodash.throttle';
 
-const form = document.querySelector('.feedback-form');
+const formEl = document.querySelector('.feedback-form');
 
-form.addEventListener('input', throttle(onInputChangeValue, 500));
-form.addEventListener('submit', onSubmitForm);
+formEl.addEventListener('input', throttle(onInputChangeValue, 500));
+formEl.addEventListener('submit', onSubmitForm);
 
-const formDate = {};
+let formDate = {};
+const STORAGE_KEY = 'feedback-form-state';
 
 function onInputChangeValue(e) {
-  e.preventDefault();
-  if (e.target === e.currentTarget) {
-    return;
-  }
-
-  formDate[e.target.name] = e.target.value;
-  localStorage.setItem('feedback-form-state', JSON.stringify(formDate));
+  const { name, value } = e.target;
+  formDate[name] = value.trim();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(formDate));
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  const dateLocalStore = localStorage.getItem('feedback-form-state');
+  try {
+    const dateLocalStore = localStorage.getItem(STORAGE_KEY);
 
-  if (dateLocalStore !== null) {
-    try {
-      const data = JSON.parse(localStorage.getItem('feedback-form-state'));
-      const emailInput = document.querySelector('.feedback-form input');
-      const messageInput = document.querySelector('.feedback-form textarea');
-      if (data) {
-        emailInput.value = data.email;
-        messageInput.value = data.message;
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
+    if (!dateLocalStore) return;
+
+    formDate = JSON.parse(dateLocalStore);
+    Object.entries(formDate).forEach(
+      ([key, value]) => (formEl.elements[key].value = value)
+    );
+  } catch (error) {
+    console.log(error.message);
   }
 });
 
 function onSubmitForm(e) {
-  console.log(JSON.parse(localStorage.getItem('feedback-form-state')));
   e.preventDefault();
+  console.log(formDate);
+  formDate = {};
   e.currentTarget.reset();
-  localStorage.removeItem('feedback-form-state');
+  localStorage.removeItem(STORAGE_KEY);
 }
